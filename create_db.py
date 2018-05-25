@@ -43,7 +43,7 @@ CREATE TABLE ConcreteBook (
   id_book INTEGER NOT NULL,
   id_config INTEGER NOT NULL,
   quality VARCHAR NOT NULL DEFAULT "Хорошее",
-  is_lost BOOLEAN DEFAULT FALSE,
+  is_lost BOOLEAN DEFAULT 0,
   FOREIGN KEY (id_book) REFERENCES Book(id),
   FOREIGN KEY (id_config) REFERENCES BookConfig(id)
 );
