@@ -98,16 +98,29 @@ AND stud.sem_num = p.sem_num
 """ # no Args
 
 BOOKS_FOR_STUDENT = """
-SELECT distinct Book.id, Book.title
+SELECT DISTINCT Book.id, Book.title
 FROM Book
-JOIN Book_Subject as bs ON bs.id_book = Book.id
-JOIN Subject as s on s.id = bs.id_subject
-JOIN Program_Subject as ps on ps.id_subject = s.id
-JOIN FacultyProgram as p on p.id = ps.id_program
-JOIN Student as st on st.faculty = p.faculty 
+JOIN Book_Subject AS bs ON bs.id_book = Book.id
+JOIN Subject AS s ON s.id = bs.id_subject
+JOIN Program_Subject AS ps ON ps.id_subject = s.id
+JOIN FacultyProgram AS p ON p.id = ps.id_program
+JOIN Student AS st ON st.faculty = p.faculty 
 AND st.specialization = p.specialization 
 AND st.sem_num = p.sem_num
-WHERE st.id_client = ? AND bs.is_necesary = 1;
+WHERE st.id_client = ? AND bs.is_necesary = 1
+
+EXCEPT
+
+SELECT Book.title, ConcreteBook.id
+FROM LibClient
+JOIN Operation
+ON Operation.id_client = LibClient.id
+JOIN ConcreteBook
+ON Operation.id_con_book = ConcreteBook.id
+JOIN Book
+ON Book.id = ConcreteBook.id_book
+WHERE LibClient.id = ?
+AND Operation.return_date IS NULL;
 """
 
 
