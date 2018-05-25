@@ -64,7 +64,7 @@ def gen_configs(cursor):
         for j in range(len(pubs)):
             year = 1960 + (i + 1)**3 + 5*j
             cursor.execute("""INSERT INTO BookConfig(publisher, edition, year)
-                              VALUES (?, ?, ?)""", (eds[i], pubs[j], year))
+                              VALUES (?, ?, ?)""", (pubs[j], eds[i], year))
     return len(eds)*len(pubs)
 
 

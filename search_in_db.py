@@ -61,20 +61,27 @@ WHERE quality != 'Хорошее' AND is_lost = 0
 GROUP BY title;
 """ # no Args
 
-THAT_BOOKS_WITH_CONFIG = """
-SELECT Count(Cb.id)
+LOST_BOOKS = """
+SELECT title, count(Book.id) FROM Book
+JOIN ConcreteBook as cb ON Book.id = cb.id_book
+WHERE is_lost = 1
+GROUP BY title;
+""" # no Args
+
+
+BOOKS_WITH_CONFIGS = """
+SELECT title, publisher, edition, year, COUNT(cb.id) as amount 
 FROM Book
-JOIN ConcreteBook AS Cb
-ON Cb.id_book = Book.id
-JOIN BookConfig AS bc
-ON bc.id = ConcreteBook.id_config
-WHERE Book.id = ?
-AND bc.id = ?
-AND cb.quality = 'Хорошее';
-""" # Args - Book.id
+JOIN ConcreteBook AS cb ON Book.id = cb.id_book
+JOIN BookConfig AS bc ON bc.id = cb.id_config
+where quality = 'Хорошее' AND is_lost = 0
+GROUP BY title, bc.id
+ORDER BY title, year;
+""" # no Args
 
 STUDENT_NEEDED_BOOKS = """
-SELECT b.id, b.title, COUNT(DISTINCT stud.id_client)
+SELECT b.id, b.title, 
+COUNT(DISTINCT stud.id_client) OVER (PARTITION BY Book.id)
 FROM Book AS b
 JOIN Book_Subject AS bs
 ON b.id = bs.id_book
@@ -88,10 +95,23 @@ JOIN Student AS stud
 ON stud.faculty = p.faculty
 AND stud.specialization = p.specialization
 AND stud.sem_num = p.sem_num
-GROUP BY b.id;
 """ # no Args
 
-BOOKS_FOR_STUDENT = None
+BOOKS_FOR_STUDENT = """
+SELECT distinct Book.id, Book.title
+FROM Book
+JOIN Book_Subject as bs ON bs.id_book = Book.id
+JOIN Subject as s on s.id = bs.id_subject
+JOIN Program_Subject as ps on ps.id_subject = s.id
+JOIN FacultyProgram as p on p.id = ps.id_program
+JOIN Student as st on st.faculty = p.faculty 
+AND st.specialization = p.specialization 
+AND st.sem_num = p.sem_num
+WHERE st.id_client = ? AND bs.is_necesary = 1;
+"""
+
+
+
 
 def query(conn, q, args):
     cursor = conn.cursor()
